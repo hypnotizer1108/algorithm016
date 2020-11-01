@@ -2,6 +2,7 @@
 class Solution {
     public int ladderLength(String beginWord, String endWord, List<String> wordList) {
         if (!wordList.contains(endWord)) return 0;
+		// 这里必须用set，否则后续检查目标单词在wordList中的时间复杂度是O(n)会超时
         Set<String> wordSet = new HashSet<>(wordList);
         int level = 1;
         Queue<String> queue = new LinkedList<>();
@@ -82,13 +83,12 @@ class Solution {
         Set<String> wordSet = new HashSet<>(wordList);
         Set<String> beginSet = new HashSet<>();
         Set<String> endSet = new HashSet<>();
-        
+
         int len = 1;
-        int strLen = beginWord.length();
         Set<String> visited = new HashSet<>();
         beginSet.add(beginWord);
         endSet.add(endWord);
-        while (!beginWord.isEmpty() && !endSet.isEmpty()) {
+        while (!beginSet.isEmpty() && !endSet.isEmpty()) {
             // 始终bfs size小的那一端
             if (beginSet.size() > endSet.size()) {
                 Set<String> set = beginSet;
@@ -104,10 +104,12 @@ class Solution {
                         char old = charArr[i];
                         charArr[i] = c;
                         String target = String.valueOf(charArr);
+
                         if (endSet.contains(target)) {
                             return len + 1;
                         }
-                        if (!visited.contains(target) && wordList.contains(target)) {
+
+                        if (!visited.contains(target) && wordSet.contains(target)) {
                             tmp.add(target);
                             visited.add(target);
                         }
