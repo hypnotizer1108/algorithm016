@@ -1,4 +1,41 @@
-// 方法1.单向BFS
+// 1.BFS：从beginword向endword扩散，当转换后的新单词等于endword时，此时遍历的深度即为所求
+class Solution {
+    public int ladderLength(String beginWord, String endWord, List<String> wordList) {
+        if (!wordList.contains(endWord)) return 0;
+        Set<String> wordSet = new HashSet<>(wordList);
+        int level = 1;
+        Queue<String> queue = new LinkedList<>();
+        Set<String> visited = new HashSet<>();
+        queue.add(beginWord);
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {0
+                String curWord = queue.remove();
+                if (curWord.equals(endWord)) return level;
+                // 这行代码很关键，相当于剪枝，去掉重复的计算，否则会超时
+                if (visited.contains(curWord)) continue;
+                for (int j = 0; j < curWord.length(); j++) {
+                    for (char ch = 'a'; ch <= 'z'; ch++) {
+                        char[] chArr = curWord.toCharArray();
+                        char oldCh = chArr[j];
+                        chArr[j] = ch;
+                        String newWord = new String(chArr);
+                        // 转换后的单词在wordList中存在，且未被访问过
+                        if (wordSet.contains(newWord) && !visited.contains(newWord)) {
+                            queue.add(newWord);
+                            visited.add(curWord);
+                        }
+                        chArr[j] = oldCh;
+                    }
+                }
+            }
+            level++;
+        }
+        return 0;
+    }
+}
+
+// 2.单向BFS优化版，无需每次都从a-z遍历26次，用*占位符即可
 class Solution {
     public int ladderLength(String beginWord, String endWord, List<String> wordList) {
         if (!wordList.contains(endWord)) return 0;
@@ -33,6 +70,53 @@ class Solution {
                     }
                 }
             }
+        }
+        return 0;
+    }
+}
+
+// 3.双向BFS
+class Solution {
+    public int ladderLength(String beginWord, String endWord, List<String> wordList) {
+        if (!wordList.contains(endWord)) return 0;
+        Set<String> wordSet = new HashSet<>(wordList);
+        Set<String> beginSet = new HashSet<>();
+        Set<String> endSet = new HashSet<>();
+        
+        int len = 1;
+        int strLen = beginWord.length();
+        Set<String> visited = new HashSet<>();
+        beginSet.add(beginWord);
+        endSet.add(endWord);
+        while (!beginWord.isEmpty() && !endSet.isEmpty()) {
+            // 始终bfs size小的那一端
+            if (beginSet.size() > endSet.size()) {
+                Set<String> set = beginSet;
+                beginSet = endSet;
+                endSet = set;
+            }
+            
+            Set<String> tmp = new HashSet<>();
+            for (String word : beginSet) {
+                char[] charArr = word.toCharArray();
+                for (int i = 0; i < charArr.length; i++) {
+                    for (char c = 'a'; c <= 'z'; c++) {
+                        char old = charArr[i];
+                        charArr[i] = c;
+                        String target = String.valueOf(charArr);
+                        if (endSet.contains(target)) {
+                            return len + 1;
+                        }
+                        if (!visited.contains(target) && wordList.contains(target)) {
+                            tmp.add(target);
+                            visited.add(target);
+                        }
+                        charArr[i] = old;
+                    }
+                }
+            }
+            beginSet = tmp;
+            len++;
         }
         return 0;
     }
